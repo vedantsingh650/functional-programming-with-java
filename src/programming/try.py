@@ -9,8 +9,7 @@ import string
 # raw_df = pd.read_excel('Adaptive Dock Scheduler.xlsx')
 # raw_df = pd.read_excel('Rishit_file_Testing.xlsx')
 raw_df = pd.read_excel('Rishit_file_Testing_huge.xlsx')  
-# 
-#Rishit_file_Testing
+
 # Below is data cleaning (Kind of Custom Logic not required always and below is hard-coded values)
 raw_df.drop(raw_df.columns[[5,6,7,8]], axis=1, inplace=True)
 # print(df.columns)
@@ -20,8 +19,8 @@ df = df.reset_index(drop = True)
 
 # Making list of time to added as data in time column
 #####################
-start_op_time='06:30:00'
-end_op_time='21:00:00'
+start_op_time='06:30:00' #exclusive in sheet excell
+end_op_time='21:00:00'  #inclusive in sheet excell
 date_time_str = datetime.datetime.strptime(start_op_time, '%H:%M:%S')
 date_time_end = datetime.datetime.strptime(end_op_time, '%H:%M:%S')
 timee=[]
@@ -109,16 +108,32 @@ wrap_format = workbook.add_format({'text_wrap': True})
 worksheet.set_column("A:L", None, wrap_format)
 worksheet.merge_range('A1:F3',To, merge_format)
 
+#####################################
+###### Creating Unassigned data sheet###############
 
 unassigned_df = df
 for x in dock_assign_index:
     unassigned_df = unassigned_df.drop(x)
 
-
 if not unassigned_df.empty:
     unassigned_df.to_excel(writer, sheet_name="unassigned", index=False)
 
+###################################
+
 writer.close()
+
+# HTML file creation
+##############################################
+html = new_df.to_html()
+html = html.replace("\\n","<br>")
+html = html.replace('class="dataframe"', 'class="table table-striped table-hover"')
+boostrap_link = '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">'
+
+Heading = '<center><h1 style="background-color:powderblue;">{To}</h2></center>'.format(To=To)
+text_file = open("work.html", "w")
+text_file.write(Heading + '\n' +  boostrap_link + '\n' + html)
+text_file.close()
+##############################################
 
 
 # worksheet.merge_range(2, 1, 3, 3, 'Merged Cells', merge_format)
@@ -141,12 +156,3 @@ writer.close()
 
 
 
-
-
-# # import  jpype     
-# # import  asposecells     
-# # jpype.startJVM() 
-# # from asposecells.api import Workbook
-# # workbook = Workbook("test2.xlsx")
-# # workbook.Save("test2.html")
-# # jpype.shutdownJVM()
